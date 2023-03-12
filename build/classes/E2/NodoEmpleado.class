@@ -1,0 +1,31 @@
+
+    Produce an appropriate Cookie header string to be sent with `request`, or None.
+
+    :rtype: str
+    """
+    r = MockRequest(request)
+    jar.add_cookie_header(r)
+    return r.get_new_headers().get('Cookie')
+
+
+def remove_cookie_by_name(cookiejar, name, domain=None, path=None):
+    """Unsets a cookie by name, by default over all domains and paths.
+
+    Wraps CookieJar.clear(), is O(n).
+    """
+    clearables = []
+    for cookie in cookiejar:
+        if cookie.name != name:
+            continue
+        if domain is not None and domain != cookie.domain:
+            continue
+        if path is not None and path != cookie.path:
+            continue
+        clearables.append((cookie.domain, cookie.path, cookie.name))
+
+    for domain, path, name in clearables:
+        cookiejar.clear(domain, path, name)
+
+
+class CookieConflictError(RuntimeError):
+    """There are two cookies that meet the criteria specified in th
